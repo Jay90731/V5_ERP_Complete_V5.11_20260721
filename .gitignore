@@ -1,0 +1,34 @@
+# Local ERP data and generated results
+V5_daily_full_flow/runs/
+V5_daily_full_flow/environment_reports/
+V5_daily_full_flow/reference_data/MENUITEM.XLS
+V5_daily_full_flow/reference_data/product_lookup.json
+V5_daily_full_flow/latest_run_path.txt
+V5_daily_full_flow/screenshot_cleanup.log
+V5_daily_full_flow/*.flag
+order_incremental_engine/baseline_source/
+order_incremental_engine/state/
+
+# Portable runtimes and generated caches
+V5_daily_full_flow/runtime/
+**/__pycache__/
+*.py[cod]
+
+# Machine-specific configuration
+V5_daily_full_flow/v5_config.json
+
+# Generated business files and screenshots
+*.xlsx
+*.xls
+*.csv
+*.png
+*.jpg
+*.jpeg
+*.log
+*.zip
+
+# Windows and editor files
+Thumbs.db
+Desktop.ini
+.vscode/
+

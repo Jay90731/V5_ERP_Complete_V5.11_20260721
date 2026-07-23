@@ -1,0 +1,20 @@
+V5.11 ERP complete portable package verification
+
+Verified on 2026-07-21:
+- Portable Python, Node, Tesseract and tessdata are present.
+- ERP capture guard tests pass.
+- Python project files compile.
+- Same-day incremental replay remains unchanged with no duplicate history versions.
+- Excel is rebuilt from the latest official order history.
+- Populated recent-six-month sheets are ordered from oldest to newest.
+- Every month sheet contains a category overview and complete detail rows.
+- Unique order counts reconcile to each month overview.
+- Multiple detail rows for one order remain separate.
+- Detail filters and frozen headings are present.
+- Category colors and number formats render correctly.
+- The pending-confirmation sheet remains available.
+- Real-image OCR recovery passed for GOU26070340 and GOU26070362.
+- Full returned batch passed with 118 successes, 0 pending and 0 failed.
+- Pending-review Excel dropdown and notes passed.
+- pending_review.json persistence and atomic commit passed.
+- Retry, exclude, cross-run retention and Excel-lock protection passed.

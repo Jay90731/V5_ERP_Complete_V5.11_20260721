@@ -1,0 +1,27 @@
+{
+  "version": "V5.11",
+  "erpExePath": "E:\\MIS\\GI_System.exe",
+  "officialStateDir": "..\\order_incremental_engine\\state",
+  "sameDayReplayInput": "..\\order_incremental_engine\\baseline_source\\orders.json",
+  "pythonCandidates": [
+    "runtime\\python\\python.exe"
+  ],
+  "nodeCandidates": [
+    "runtime\\node\\node.exe"
+  ],
+  "nodeModulesCandidates": [
+    "runtime\\node_modules"
+  ],
+  "tesseractCandidates": [
+    "runtime\\tesseract\\tesseract.exe"
+  ],
+  "tessdataCandidates": [
+    "runtime\\tesseract\\tessdata"
+  ],
+  "maximumOrders": 2000,
+  "dailyLookbackDays": 7,
+  "screenshotRetentionDays": 7,
+  "monthlyFullRunDay": 1,
+  "minimumWaitSeconds": 2,
+  "maximumWaitSeconds": 5
+}

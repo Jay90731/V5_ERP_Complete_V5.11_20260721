@@ -1,0 +1,30 @@
+{
+  "title": "婚約訂單 V5.11 每日完整流程",
+  "start": "開始每日流程",
+  "continue": "登入完成，繼續",
+  "continueSent": "已通知 ERP 登入完成，正在繼續處理",
+  "resume": "繼續未完成流程",
+  "stop": "停止",
+  "openExcel": "開啟 Excel",
+  "openLogs": "查看紀錄",
+  "close": "關閉",
+  "idle": "尚未開始",
+  "running": "執行中",
+  "queryRange": "查詢範圍",
+  "selectedRange": "目前選擇",
+  "rangeSevenDays": "最近 7 日",
+  "rangeSixMonths": "最近 6 個月",
+  "completed": "完成",
+  "failed": "失敗",
+  "stopped": "已停止",
+  "interrupted": "上次流程已中斷，可重新選擇查詢範圍後開始，或繼續未完成流程",
+  "stages": {
+    "erp_prepare": "ERP準備",
+    "capture": "批次截圖",
+    "ocr": "OCR",
+    "validate": "資料驗證",
+    "compare": "異動比較",
+    "excel": "Excel更新",
+    "complete": "完成"
+  }
+}

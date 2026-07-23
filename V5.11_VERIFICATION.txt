@@ -1,0 +1,97 @@
+V5.11 pending-review verification
+
+Verified on 2026-07-21 with the returned V5.9/V5.10 data.
+
+Excel:
+- Pending sheet has columns 處理結果 and 處理備註.
+- 處理結果 has a list validation with 待確認, 重新辨識, 確認不納入.
+- Filter and frozen heading remain enabled.
+
+Persistence:
+- Excel selections synchronize to pending_review.json by order number.
+- Notes survive Excel rebuilds.
+- Unprocessed and excluded records remain across subsequent builds.
+- Resolved retry records remain in JSON history but leave the pending sheet.
+
+Workflow acceptance:
+- GOU26070340 selected as 重新辨識: OCR success and added to 2026-07.
+- GOU26070362 selected as 確認不納入: excluded from details and retained with note.
+- Both records selected as 重新辨識: retry success 2/2.
+- Excel-open lock detection passed.
+- Atomic update committed pending_review.json with history and Excel.
+- Reprocessed batch: new 1, unchanged 116, changed 0, pending 0, failed 0.
+
+Safety:
+- V5.10 remains untouched.
+
+2026-07-22 ERP focus fix
+- Capture build updated to V4.14 embedded in V5.11.
+- ERP is reactivated immediately before clicking the selected order row.
+- If another process still takes foreground focus, the tool sends Down Arrow
+  directly to the ERP order-list control and continues order-number validation.
+- The failed 2026-07-22 run stopped after one safe screenshot; OCR, history and
+  the official Excel were not updated.
+
+2026-07-22 query range selector
+- START_V5 now offers a seven-day or six-month query range selector.
+- Seven days is the default for normal daily use.
+- Starting a new run passes an explicit mode to the worker, including on the
+  first day of a month.
+- Resume keeps the original batch mode and ignores a newly selected range.
+- Launcher smoke tests passed for both default selections.
+
+2026-07-22 login continue enablement fix
+- The launcher now finds the newest run_state.json inside its own runs folder.
+- A stale latest_run_path.txt copied from another PC no longer leaves the
+  stage list blank or keeps the login Continue button disabled.
+- Stop and login flags are cleared before the new run state is published, so
+  a valid operator click cannot be deleted by worker initialization.
+- The login flag is written before the launcher minimizes and the button shows
+  a confirmation state immediately after the click.
+
+2026-07-22 legacy MDI maximize fix
+- The returned run passed login and query-field entry, then safely stopped
+  because the ERP order child remained 1044x707.
+- Capture build V4.15 now retries legacy MDI maximization with WM_SYSCOMMAND
+  SC_MAXIMIZE and a title-bar double-click message sent only to the confirmed
+  ERP child handle.
+- The child size is measured after every method and must still reach the
+  confirmed workspace size before screenshots can begin.
+- The failed run produced no screenshots and did not run OCR or update Excel.
+
+2026-07-22 query selector unlock fix
+- Query range controls now use the live V5 worker mutex instead of trusting a
+  historical run_state.json whose status may still say running.
+- With no worker process active, both seven-day and six-month modes are
+  selectable even when the newest saved run was interrupted.
+- While a real worker is active, the selector remains locked to protect the
+  current batch conditions.
+- Launcher smoke tests passed with mode_enabled=True for both defaults.
+
+2026-07-22 verified maximize-button fallback
+- Capture build V4.16 derives the ERP child maximize-button point from the
+  current child rectangle: X=right-46 and Y=top+10.
+- Before clicking, WindowFromPoint must resolve to the confirmed ERP process.
+- After clicking, the child rectangle is measured again and must reach at
+  least 1700x800 before query capture can continue.
+- The returned 1044x707 child at 438,177 calculates to 1436,187; coordinate
+  regression tests passed for both X and Y.
+
+2026-07-23 query mode button compatibility fix
+- Replaced Appearance=Button RadioButton controls with standard Button
+  controls and one explicit SelectedQueryMode value.
+- Selected mode is shown with blue background and white text; the status line
+  updates immediately after every click.
+- Start-Worker reads the same SelectedQueryMode value used by the interface.
+- Visible-form click tests passed from both initial modes:
+  click_six_month=True and click_seven_day=True.
+- Manual review is read before ERP capture.
+- Excel is checked again before official history replacement.
+
+2026-07-23 screenshot retention
+- Added screenshotRetentionDays=7 to v5_config.json.
+- Every V5 start removes PNG captures only from completed runs older than
+  seven days; unfinished and resumable runs are skipped.
+- Excel, order history, pending review data, JSON state and logs are retained.
+- Isolated regression test passed: old completed capture deleted, old
+  unfinished capture retained, and recent completed capture retained.
