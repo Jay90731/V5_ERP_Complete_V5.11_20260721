@@ -2,7 +2,6 @@ param(
   [string]$ErpExePath = "E:\MIS\GI_System.exe",
   [int]$LoginWaitTimeoutSeconds = 180,
   [int]$OrderScreenTimeoutSeconds = 60,
-  [switch]$EnableFixedPositionFallback,
   [int]$QueryDialogTimeoutSeconds = 20,
   [switch]$FullSixMonths,
   [switch]$OneMonth,
@@ -189,20 +188,6 @@ function Invoke-Step {
     Write-Log "STEP FAIL: $Name $reason"
     throw
   }
-}
-
-function Stop-Test {
-  param([string]$Reason, [int]$Code = 1)
-  Write-Log "STOP: $Reason"
-  Set-Content -LiteralPath $ErrorPath -Value $Reason -Encoding UTF8
-  Set-Content -LiteralPath $SummaryPath -Value @(
-    "status=failed"
-    "reason=$Reason"
-    "steps_csv=$(Get-PortableBatchPath -Path $StepPath)"
-    "log=$(Get-PortableBatchPath -Path $LogPath)"
-    "time=$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
-  ) -Encoding UTF8
-  exit $Code
 }
 
 Add-Type -AssemblyName System.Drawing
@@ -512,58 +497,6 @@ function Save-WindowPng {
   return "${width}x${height}"
 }
 
-function Get-AutomationRoot {
-  param([IntPtr]$Handle)
-  return [System.Windows.Automation.AutomationElement]::FromHandle($Handle)
-}
-
-function Find-ElementByName {
-  param(
-    [System.Windows.Automation.AutomationElement]$RootElement,
-    [string]$Name,
-    [int]$TimeoutSeconds = 8
-  )
-
-  $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
-  $condition = New-Object System.Windows.Automation.PropertyCondition(
-    [System.Windows.Automation.AutomationElement]::NameProperty,
-    $Name
-  )
-  while ((Get-Date) -lt $deadline) {
-    $found = $RootElement.FindFirst([System.Windows.Automation.TreeScope]::Descendants, $condition)
-    if ($null -ne $found) { return $found }
-    Start-Sleep -Milliseconds 300
-  }
-  return $null
-}
-
-function Invoke-UiaElement {
-  param(
-    [System.Windows.Automation.AutomationElement]$Element,
-    [string]$Name
-  )
-
-  if ($null -eq $Element) { throw "Target not found: $Name" }
-  try {
-    $pattern = $Element.GetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern)
-    $pattern.Invoke()
-    Start-Sleep -Milliseconds 800
-    return "uia_invoke:$Name"
-  } catch {
-    try {
-      $point = $Element.GetClickablePoint()
-      [ErpV35Native]::SetCursorPos([int]$point.X, [int]$point.Y) | Out-Null
-      Start-Sleep -Milliseconds 100
-      [ErpV35Native]::mouse_event([ErpV35Native]::MOUSEEVENTF_LEFTDOWN, 0, 0, 0, [UIntPtr]::Zero)
-      [ErpV35Native]::mouse_event([ErpV35Native]::MOUSEEVENTF_LEFTUP, 0, 0, 0, [UIntPtr]::Zero)
-      Start-Sleep -Milliseconds 800
-      return "uia_click:$Name"
-    } catch {
-      throw "Target exists but cannot be invoked: $Name"
-    }
-  }
-}
-
 function Test-UnknownPopup {
   $foreground = [ErpV35Native]::GetForegroundWindow()
   if ($foreground -eq [IntPtr]::Zero) { return }
@@ -783,94 +716,6 @@ function Wait-ForQueryDialog {
   return $null
 }
 
-function Get-DescendantElementsByControlType {
-  param(
-    [System.Windows.Automation.AutomationElement]$RootElement,
-    [System.Windows.Automation.ControlType]$ControlType
-  )
-
-  $condition = New-Object System.Windows.Automation.PropertyCondition(
-    [System.Windows.Automation.AutomationElement]::ControlTypeProperty,
-    $ControlType
-  )
-  return @($RootElement.FindAll([System.Windows.Automation.TreeScope]::Descendants, $condition))
-}
-
-function Set-UiaValue {
-  param(
-    [System.Windows.Automation.AutomationElement]$Element,
-    [string]$Value,
-    [string]$Name
-  )
-
-  try {
-    $pattern = $Element.GetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern)
-    $pattern.SetValue($Value)
-    Write-Log "Set UIA value $Name=$Value"
-    return $true
-  } catch {
-    Write-Log "Set UIA value failed for $Name`: $($_.Exception.Message)"
-    return $false
-  }
-}
-
-function Try-FillQueryDialogUia {
-  param([object]$Dialog)
-
-  $rootElement = Get-AutomationRoot -Handle $Dialog.Handle
-  $edits = @(Get-DescendantElementsByControlType -RootElement $rootElement -ControlType ([System.Windows.Automation.ControlType]::Edit))
-  Write-Log "Query dialog UIA edit count: $($edits.Count)"
-  if ($edits.Count -lt 3) { return $false }
-
-  $setCount = 0
-  if (Set-UiaValue -Element $edits[0] -Value $DateStart -Name "start_date") { $setCount++ }
-  if (Set-UiaValue -Element $edits[1] -Value $DateEnd -Name "end_date") { $setCount++ }
-  if (Set-UiaValue -Element $edits[2] -Value $OrderPrefix -Name "order_prefix") { $setCount++ }
-  if ($setCount -lt 3) { return $false }
-
-  $buttonNames = @($OkText, $QueryText, "OK")
-  foreach ($buttonName in $buttonNames) {
-    $button = Find-ElementByName -RootElement $rootElement -Name $buttonName -TimeoutSeconds 2
-    if ($null -ne $button) {
-      $result = Invoke-UiaElement -Element $button -Name $buttonName
-      Write-Log "Query confirm: $result"
-      return $true
-    }
-  }
-
-  [System.Windows.Forms.SendKeys]::SendWait("{ENTER}")
-  Write-Log "Query confirm: enter_key_after_uia_values"
-  return $true
-}
-
-function Fill-QueryDialogByKeyboard {
-  param([object]$Dialog)
-
-  [void][ErpV35Native]::SetForegroundWindow($Dialog.Handle)
-  Start-Sleep -Milliseconds 400
-  Write-Log "Keyboard query fallback: start=$DateStart end=$DateEnd prefix=$OrderPrefix"
-
-  [System.Windows.Forms.SendKeys]::SendWait("^a")
-  Start-Sleep -Milliseconds 100
-  [System.Windows.Forms.SendKeys]::SendWait($DateStart)
-  Start-Sleep -Milliseconds 100
-  [System.Windows.Forms.SendKeys]::SendWait("{TAB}")
-  Start-Sleep -Milliseconds 100
-  [System.Windows.Forms.SendKeys]::SendWait("^a")
-  Start-Sleep -Milliseconds 100
-  [System.Windows.Forms.SendKeys]::SendWait($DateEnd)
-  Start-Sleep -Milliseconds 100
-  [System.Windows.Forms.SendKeys]::SendWait("{TAB}")
-  Start-Sleep -Milliseconds 100
-  [System.Windows.Forms.SendKeys]::SendWait("^a")
-  Start-Sleep -Milliseconds 100
-  [System.Windows.Forms.SendKeys]::SendWait($OrderPrefix)
-  Start-Sleep -Milliseconds 100
-  [System.Windows.Forms.SendKeys]::SendWait("{ENTER}")
-  Start-Sleep -Milliseconds 800
-  return "keyboard_tab_sequence"
-}
-
 function Set-ClipboardTextWithRetry {
   param([string]$Text)
 
@@ -1060,55 +905,6 @@ function Invoke-OrderQuery {
   }
 
   return "query_submitted_by=$filledBy start=$DateStart end=$DateEnd prefix=$OrderPrefix"
-}
-
-function Invoke-MenuPathUia {
-  param(
-    [IntPtr]$MainHandle,
-    [string[]]$MenuNames
-  )
-
-  foreach ($name in $MenuNames) {
-    $rootElement = Get-AutomationRoot -Handle $MainHandle
-    $element = Find-ElementByName -RootElement $rootElement -Name $name -TimeoutSeconds 8
-    if ($null -eq $element) { throw "Menu target not found before click: $name" }
-    $result = Invoke-UiaElement -Element $element -Name $name
-    Write-Log "Menu action: $result"
-    Test-UnknownPopup
-  }
-}
-
-function Invoke-FixedFallbackPath {
-  param([object]$MainWindow)
-
-  $screen = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
-  if ($screen.Width -ne 1920 -or $screen.Height -ne 1080) {
-    throw "Fixed-position fallback requires 1920x1080 display. Current=$($screen.Width)x$($screen.Height)."
-  }
-
-  if (-not $EnableFixedPositionFallback) {
-    throw "UI Automation failed. Fixed-position fallback is disabled for this run."
-  }
-
-  if (-not (Activate-Window -Handle $MainWindow.Handle)) {
-    throw "ERP window could not be activated before fixed-position menu navigation."
-  }
-
-  Write-Log "Fixed-position fallback enabled. Using 1920x1080 / 100 percent layout assumptions."
-  $steps = @(
-    @{ Name = "top menu foreign management"; X = 268; Y = 34 },
-    @{ Name = "external gift order entry"; X = 300; Y = 78 }
-  )
-
-  foreach ($step in $steps) {
-    Write-Log "Fallback click target=$($step.Name) x=$($step.X) y=$($step.Y)"
-    [void][ErpV35Native]::SetCursorPos([int]$step.X, [int]$step.Y)
-    Start-Sleep -Milliseconds 200
-    [ErpV35Native]::mouse_event([ErpV35Native]::MOUSEEVENTF_LEFTDOWN, 0, 0, 0, [UIntPtr]::Zero)
-    [ErpV35Native]::mouse_event([ErpV35Native]::MOUSEEVENTF_LEFTUP, 0, 0, 0, [UIntPtr]::Zero)
-    Start-Sleep -Milliseconds 1200
-    Test-UnknownPopup
-  }
 }
 
 function Wait-ForErpWindow {
@@ -1788,18 +1584,6 @@ function Capture-OrderImage {
     throw "Screenshot for $OrderNumber is too small and may be blank."
   }
   return [pscustomobject]@{ Saved = $true; Path = $path; Reason = "captured size=$size bytes=$($file.Length)" }
-}
-
-function Get-OrderScreenSignature {
-  param([object]$OrderWindow)
-
-  $probePath = Join-Path $LogDir ("screen_probe_{0}_{1}.png" -f $PID, ([guid]::NewGuid().ToString("N")))
-  try {
-    [void](Save-WindowPng -Handle $OrderWindow.Handle -Path $probePath)
-    return (Get-FileHash -LiteralPath $probePath -Algorithm SHA256).Hash
-  } finally {
-    Remove-Item -LiteralPath $probePath -Force -ErrorAction SilentlyContinue
-  }
 }
 
 $runStarted = Get-Date

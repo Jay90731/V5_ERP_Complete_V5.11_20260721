@@ -23,8 +23,6 @@ function Find-First {
 }
 
 $python = Find-First $Config.pythonCandidates
-$node = Find-First $Config.nodeCandidates
-$nodeModules = Find-First $Config.nodeModulesCandidates
 $tesseract = Find-First $Config.tesseractCandidates
 $tessdata = Find-First $Config.tessdataCandidates
 $official = Resolve-ConfiguredPath ([string]$Config.officialStateDir)
@@ -40,8 +38,6 @@ if ($python) {
 $checks = [ordered]@{
   erp_exe = [bool](Test-Path -LiteralPath $erp)
   python = [bool]$python
-  node = [bool]$node
-  node_modules = [bool]$nodeModules
   tesseract = [bool]$tesseract
   tessdata = [bool]$tessdata
   official_history = [bool](Test-Path -LiteralPath (Join-Path $official "order_history.json"))
@@ -50,7 +46,7 @@ $checks = [ordered]@{
   product_lookup = [bool](Test-Path -LiteralPath $productLookup)
   xlrd = [bool]$xlrdReady
 }
-$critical = @("python", "node", "node_modules", "tesseract", "tessdata", "official_history", "official_excel", "menuitem", "product_lookup", "xlrd")
+$critical = @("python", "tesseract", "tessdata", "official_history", "official_excel", "menuitem", "product_lookup", "xlrd")
 $readyReplay = -not @($critical | Where-Object { -not $checks[$_] }).Count
 $readyErp = $readyReplay -and $checks.erp_exe
 $result = [ordered]@{
@@ -61,8 +57,6 @@ $result = [ordered]@{
   resolved = [ordered]@{
     erp_exe = $erp
     python = $python
-    node = $node
-    node_modules = $nodeModules
     tesseract = $tesseract
     tessdata = $tessdata
     official_state = $official

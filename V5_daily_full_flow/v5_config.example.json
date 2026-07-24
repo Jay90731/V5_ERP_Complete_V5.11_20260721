@@ -6,12 +6,6 @@
   "pythonCandidates": [
     "runtime\\python\\python.exe"
   ],
-  "nodeCandidates": [
-    "runtime\\node\\node.exe"
-  ],
-  "nodeModulesCandidates": [
-    "runtime\\node_modules"
-  ],
   "tesseractCandidates": [
     "runtime\\tesseract\\tesseract.exe"
   ],

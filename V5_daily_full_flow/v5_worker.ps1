@@ -292,7 +292,6 @@ try {
   Write-RunLog "V5 started mode=$($RunState.run_mode) resume=$ResumeLatest"
 
   $script:Python = Resolve-FirstExisting -Candidates $Config.pythonCandidates -Name "Python"
-  $script:Node = $script:Python
   $OfficialStateDir = Resolve-RootPath -PathValue ([string]$Config.officialStateDir)
   $OfficialHistory = Join-Path $OfficialStateDir "order_history.json"
   $OfficialExcel = Join-Path $OfficialStateDir "current_orders.xlsx"
