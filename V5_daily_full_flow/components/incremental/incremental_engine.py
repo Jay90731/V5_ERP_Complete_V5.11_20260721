@@ -495,20 +495,22 @@ def write_change_log(path: Path, rows: list[dict[str, str]]) -> None:
 
 
 def run_excel_builder(
-    node: Path,
     builder: Path,
     history_path: Path,
     current_path: Path,
     output_path: Path,
     preview_path: Path | None,
 ) -> None:
-    executable = Path(sys.executable) if builder.suffix.lower() == ".py" else node
-    command = [str(executable), str(builder), str(history_path), str(output_path)]
-    if builder.suffix.lower() == ".py":
-        command.append(str(current_path))
-        if preview_path:
-            command.append(str(preview_path))
-    elif preview_path:
+    if builder.suffix.lower() != ".py":
+        raise ValueError(f"Excel builder must be a Python script: {builder}")
+    command = [
+        sys.executable,
+        str(builder),
+        str(history_path),
+        str(output_path),
+        str(current_path),
+    ]
+    if preview_path:
         command.append(str(preview_path))
     completed = subprocess.run(
         command,
@@ -616,7 +618,6 @@ def execute_update(args: argparse.Namespace) -> dict[str, Any]:
             if not args.excel_builder:
                 raise ValueError("未提供 Excel builder，無法安全產生 current_orders.xlsx")
             run_excel_builder(
-                Path(args.node) if args.node else Path(sys.executable),
                 Path(args.excel_builder),
                 staged_history,
                 staged_current,
@@ -658,7 +659,6 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--source-image-pattern", help="只處理符合檔名規則的來源，例如 ^GOU.*\\.png$")
     parser.add_argument("--target-department", default=TARGET_DEPARTMENT)
     parser.add_argument("--run-at", help="測試用固定時間，ISO 8601")
-    parser.add_argument("--node", help="Node.js 執行檔；Python Excel builder 不使用此參數")
     parser.add_argument("--excel-builder", help="current_orders.xlsx builder")
     parser.add_argument("--pending-review", help="待確認人工處理的下一版 pending_review.json")
     parser.add_argument("--preview", help="選填：Excel 預覽 PNG 路徑")

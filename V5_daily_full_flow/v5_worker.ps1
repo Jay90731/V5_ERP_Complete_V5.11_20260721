@@ -538,7 +538,6 @@ try {
     "--state-dir", $OfficialStateDir,
     "--batch-complete",
     "--source-image-pattern", "^GOU[0-9A-Z-]+\.png$",
-    "--node", $Node,
     "--excel-builder", $ExcelBuilder,
     "--pending-review", $PendingReviewNext,
     "--preview", $PreviewPath
