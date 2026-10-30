@@ -1,0 +1,20 @@
+{
+  "mode": "formal",
+  "watch_folder": "C:\\Users\\auntstella\\BHQ\\_Export\\INBOX",
+  "processing_folder": "C:\\Users\\auntstella\\BHQ\\_Export\\Processing",
+  "completed_folder": "C:\\Users\\auntstella\\BHQ\\_Export\\Completed",
+  "failed_folder": "C:\\Users\\auntstella\\BHQ\\_Export\\Failed",
+  "database": "C:\\Users\\auntstella\\Desktop\\V6_DB_WEB\\data\\orders.db",
+  "state_file": "C:\\Users\\auntstella\\BHQ\\_Export\\Logs\\bhq_watcher_state.json",
+  "reports_folder": "C:\\Users\\auntstella\\BHQ\\_Export\\Results",
+  "logs_folder": "C:\\Users\\auntstella\\BHQ\\_Export\\Logs",
+  "stop_file": "C:\\Users\\auntstella\\BHQ\\_Export\\Logs\\bhq_watcher.stop",
+  "status_file": "C:\\Users\\auntstella\\BHQ\\_Export\\Logs\\bhq_watcher_status.json",
+  "instance_lock_file": "C:\\Users\\auntstella\\BHQ\\_Export\\Logs\\bhq_watcher.instance",
+  "scan_interval_seconds": 5,
+  "stable_checks": 3,
+  "minimum_file_age_seconds": 10,
+  "formal_enabled": false,
+  "formal_enable_confirmation": "",
+  "backup_before_formal_import": true
+}

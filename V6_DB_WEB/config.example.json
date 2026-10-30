@@ -1,0 +1,9 @@
+{
+  "environment": "development",
+  "database_path": "data/orders_test.db",
+  "screenshots_path": "storage/screenshots",
+  "backups_path": "backups",
+  "v5_source_path": "../V5_ERP_Complete_V5.10_20260721",
+  "notes": "正式 ERP 電腦請另建 config.json，database_path 指向 ERP 電腦本機的 orders.db。"
+}
+

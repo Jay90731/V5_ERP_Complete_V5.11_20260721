@@ -1,0 +1,75 @@
+{
+  "version": 2,
+  "targetDepartment": "4001",
+  "orders": [
+    {
+      "imageName": "GOU26080001.png",
+      "departmentCode": "4001",
+      "orderNo": "GOU26080001",
+      "category": "婚約",
+      "orderDate": "2026.08.01",
+      "details": [
+        {
+          "giftCode": "710001",
+          "listPrice": 900,
+          "quantity": 2,
+          "totalAmount": 1800,
+          "discountAmount": 1600
+        },
+        {
+          "giftCode": "710002",
+          "listPrice": 600,
+          "quantity": 3,
+          "totalAmount": 1800,
+          "discountAmount": 1500
+        }
+      ],
+      "summaryTotals": {
+        "quantity": 5,
+        "totalAmount": 3600,
+        "discountAmount": 3100
+      },
+      "detailCodeColumnVisible": true,
+      "voided": false,
+      "statusLevel": "success",
+      "errorReason": ""
+    },
+    {
+      "imageName": "GOU26080002.png",
+      "departmentCode": "4001",
+      "orderNo": "GOU26080002",
+      "category": "婚約",
+      "orderDate": "2026.08.01",
+      "details": [],
+      "detailCodeColumnVisible": true,
+      "voided": false,
+      "statusLevel": "pending",
+      "errorReason": "訂貨明細未辨識"
+    },
+    {
+      "imageName": "GOU26080003.png",
+      "departmentCode": "4100",
+      "orderNo": "GOU26080003",
+      "category": "其他",
+      "orderDate": "2026.08.01",
+      "details": [],
+      "detailCodeColumnVisible": true,
+      "voided": false,
+      "statusLevel": "success",
+      "errorReason": "非4001"
+    },
+    {
+      "imageName": "GOU26080004.png",
+      "departmentCode": "4001",
+      "orderNo": "GOU26080004",
+      "category": "其他",
+      "orderDate": "2026.08.01",
+      "details": [],
+      "detailCodeColumnVisible": true,
+      "voided": true,
+      "statusLevel": "success",
+      "errorReason": "作廢"
+    }
+  ]
+}
+

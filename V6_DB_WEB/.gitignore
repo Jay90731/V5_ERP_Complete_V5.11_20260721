@@ -1,0 +1,35 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+
+# Never commit live SQLite databases, journals, or write locks.
+*.db
+*.db-*
+*.write.lock
+
+# Databases and runtime data are never part of program updates.
+data/
+storage/screenshots/*
+!storage/screenshots/.gitkeep
+backups/*
+!backups/.gitkeep
+reports/*.json
+reports/*.md
+!reports/.gitkeep
+runs/
+control/
+environment_reports/
+dist/
+erp_returns/
+verification/
+outputs/
+
+# Local machine state and generated deployment artifacts.
+latest_run_path.txt
+bhq_watcher_formal.json
+bhq_watcher_test.json
+*.zip
+*.rar
+*.7z
+*.log

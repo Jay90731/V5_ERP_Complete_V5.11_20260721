@@ -1,0 +1,30 @@
+{
+  "version": "V6_UNIFIED_FORMAL_DATABASE_1",
+  "database_path": "data\\orders.db",
+  "database_mode": "formal",
+  "runs_path": "runs",
+  "control_path": "control",
+  "erp_exe_path": "E:\\MIS\\GI_System.exe",
+  "capture_script": "components\\erp_capture\\capture_erp_v4_full_batch.ps1",
+  "ocr_script": "components\\ocr\\extract_orders.py",
+  "powershell_candidates": [
+    "powershell.exe"
+  ],
+  "python_candidates": [
+    "runtime\\python\\python.exe",
+    "python.exe",
+    "python"
+  ],
+  "tesseract_candidates": [
+    "runtime\\tesseract\\tesseract.exe",
+    "C:\\Users\\USER\\OneDrive\\桌面\\截圖辨識Excel\\OCR_Tesseract\\tesseract.exe"
+  ],
+  "tessdata_candidates": [
+    "runtime\\tesseract\\tessdata",
+    "C:\\Users\\USER\\OneDrive\\桌面\\截圖辨識Excel\\OCR_Tesseract\\tessdata"
+  ],
+  "daily_range_days": 7,
+  "minimum_wait_seconds": 2,
+  "maximum_wait_seconds": 5,
+  "maximum_orders": 2000
+}

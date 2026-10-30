@@ -1,0 +1,9 @@
+[project]
+name = "wedding-orders-v6"
+version = "0.1.0"
+description = "婚約訂單管理系統 V6 SQLite core"
+requires-python = ">=3.8"
+dependencies = []
+
+[tool.unittest]
+start-directory = "tests"

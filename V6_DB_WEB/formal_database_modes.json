@@ -1,0 +1,24 @@
+{
+  "test": {
+    "database": "data/orders_test.db",
+    "allowed_commands": [
+      "migrate",
+      "import-v5",
+      "replay-ocr",
+      "run-daily-erp"
+    ]
+  },
+  "formal": {
+    "database": "data/orders.db",
+    "required_marker": "database_mode=formal",
+    "allowed_commands": [
+      "initialize-formal",
+      "import-formal-v5",
+      "validate-formal",
+      "backup-formal",
+      "restore-formal",
+      "run-daily-erp",
+      "run-six-months-erp"
+    ]
+  }
+}

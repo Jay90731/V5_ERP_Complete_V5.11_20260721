@@ -1,0 +1,12 @@
+{
+  "title": "婚約訂單 V6 雙辨識流程",
+  "start": "開始每日 7 天流程",
+  "continue": "登入完成，繼續",
+  "manualMaximizeMessage": "請手動最大化 ERP 訂單子視窗，完成後按下繼續。",
+  "manualMaximizeContinue": "已完成最大化，繼續",
+  "resume": "繼續未完成流程",
+  "stop": "停止",
+  "openRun": "開啟本次結果",
+  "close": "關閉",
+  "idle": "尚未開始"
+}

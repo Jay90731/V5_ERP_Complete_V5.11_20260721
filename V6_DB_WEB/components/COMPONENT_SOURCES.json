@@ -1,0 +1,9 @@
+{
+  "source": "V6 DUAL R3 date-range validation and portable pending images",
+  "copied_without_modification": false,
+  "files": {
+    "erp_capture/capture_erp_v4_full_batch.ps1": "0D2723E04E846697560169D6121497DCDB9FAFBE8A3ABD442E89F241BD1909B3",
+    "erp_capture/capture_guard_helpers.ps1": "481B841AC3B9581282EE7D94A826F8F94A5EB8B20BE8BC877E625CFEEE3CE25A",
+    "ocr/extract_orders.py": "ED734CCABB851B70701637F3767550FDC95B775833EC13B20A055B441A4FBFBA"
+  }
+}

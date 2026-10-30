@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>婚約訂單管理</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <h1>婚約訂單管理</h1>
+      <p id="db-status" class="status-line">資料庫檢查中</p>
+    </div>
+    <div class="header-actions">
+      <div class="header-metrics">
+        <span><b id="formal-count">-</b> 可查訂單</span>
+        <span class="pending-metric"><b id="pending-count">-</b> 待確認</span>
+      </div>
+      <button type="button" id="refresh-data" class="refresh-button" title="重新整理" aria-label="重新整理">⟳</button>
+    </div>
+  </header>
+
+  <nav class="tabs" aria-label="主要功能">
+    <button class="tab active" data-view="orders">訂單清單</button>
+    <button class="tab" data-view="reviews">待確認</button>
+    <button class="tab" data-view="statistics">統一統計</button>
+  </nav>
+
+  <main>
+    <section id="orders-view" class="view active">
+      <form id="order-filters" class="filter-bar">
+        <label>
+          <span>來源系統</span>
+          <select id="order-source" name="source_system">
+            <option value="ALL">全部</option><option value="ERP">ERP</option><option value="BHQ">BHQ</option>
+          </select>
+        </label>
+        <label>
+          <span>門市</span>
+          <select id="order-store" name="store_code"><option value="">全部門市</option></select>
+        </label>
+        <label>
+          <span>起始日期</span>
+          <input id="date-from" name="date_from" type="date">
+        </label>
+        <label>
+          <span>結束日期</span>
+          <input id="date-to" name="date_to" type="date">
+        </label>
+        <label>
+          <span>月份</span>
+          <select id="order-month" name="month"><option value="">全部月份</option></select>
+        </label>
+        <label>
+          <span>分類</span>
+          <select id="order-category" name="category"><option value="">全部分類</option></select>
+        </label>
+        <label>
+          <span>訂單編號</span>
+          <input id="order-no" name="order_no" placeholder="輸入完整或部分單號">
+        </label>
+        <label>
+          <span>產品代碼</span>
+          <input id="product-code" name="product_code" placeholder="例如 705428">
+        </label>
+        <label class="search-field">
+          <span>產品名稱</span>
+          <input id="product-name" name="product_name" placeholder="搜尋原始產品名稱">
+        </label>
+        <div class="filter-actions">
+          <button type="submit" class="primary">查詢</button>
+          <button type="button" id="clear-orders">清除</button>
+        </div>
+      </form>
+      <div id="source-note" class="data-note">目前顯示 ERP＋BHQ 統一資料；營業額按訂單加總一次。</div>
+      <div class="table-toolbar">
+        <p id="orders-result">載入中</p>
+        <label class="page-size">每頁
+          <select id="orders-page-size"><option>20</option><option selected>30</option><option>50</option><option>100</option></select>
+        </label>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>門市</th><th>訂單分類</th><th>訂單編號</th><th>日期</th><th>產品代碼</th><th>產品名稱</th><th class="number">數量</th><th class="number">折後金額</th></tr></thead>
+          <tbody id="orders-body"></tbody>
+        </table>
+      </div>
+      <div id="orders-pagination" class="pagination"></div>
+    </section>
+
+    <section id="reviews-view" class="view">
+      <form id="review-filters" class="filter-bar compact">
+        <label class="search-field">
+          <span>關鍵字</span>
+          <input id="review-keyword" placeholder="訂單編號或錯誤原因">
+        </label>
+        <label>
+          <span>狀態</span>
+          <select id="review-status">
+            <option value="pending">待確認</option>
+            <option value="retry_requested">缺原圖，需查 ERP</option>
+            <option value="resolved">已處理</option>
+            <option value="excluded">不納入</option>
+            <option value="">全部</option>
+          </select>
+        </label>
+        <div class="filter-actions"><button type="submit" class="primary">查詢</button></div>
+      </form>
+      <div class="table-toolbar"><p id="reviews-result">載入中</p></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>訂單編號</th><th>狀態</th><th>原因</th><th>圖片</th><th>最後出現</th><th>操作</th></tr></thead>
+          <tbody id="reviews-body"></tbody>
+        </table>
+      </div>
+      <div id="reviews-pagination" class="pagination"></div>
+    </section>
+
+    <section id="statistics-view" class="view">
+      <div class="stats-filter stats-controls">
+        <label><span>來源系統</span><select id="stats-source"><option value="ALL">全部</option><option value="ERP">ERP</option><option value="BHQ">BHQ</option></select></label>
+        <label><span>統計月份</span><select id="stats-month"><option value="">全部月份</option></select></label>
+      </div>
+      <div class="summary-grid unified-summary">
+        <article><span>訂單數</span><b id="stat-orders">-</b></article>
+        <article><span>商品數量</span><b id="stat-boxes">-</b></article>
+        <article><span>折後總金額</span><b id="stat-amount">-</b></article>
+        <article class="erp-card"><span>ERP 訂單數</span><b id="stat-erp-orders">-</b></article>
+        <article class="erp-card"><span>ERP 折後金額</span><b id="stat-erp-amount">-</b></article>
+        <article class="bhq-card"><span>BHQ 訂單數</span><b id="stat-bhq-orders">-</b></article>
+        <article class="bhq-card"><span>BHQ 折後金額</span><b id="stat-bhq-amount">-</b></article>
+      </div>
+      <section class="section-band">
+        <h2>門市</h2>
+        <div class="table-wrap"><table><thead><tr><th>來源</th><th>門市</th><th>門市名稱</th><th class="number">訂單數</th><th class="number">商品數量</th><th class="number">折後金額</th></tr></thead><tbody id="store-stats"></tbody></table></div>
+      </section>
+      <section class="section-band">
+        <h2>訂單分類</h2>
+        <div class="table-wrap"><table><thead><tr><th>分類</th><th class="number">訂單數</th><th class="number">禮盒總數</th><th class="number">折後金額</th><th class="number">平均訂單金額</th><th class="number">平均單盒金額</th><th class="number">平均訂單盒數</th></tr></thead><tbody id="category-stats"></tbody></table></div>
+      </section>
+      <section class="section-band">
+        <h2>月份</h2>
+        <div class="table-wrap"><table><thead><tr><th>月份</th><th class="number">訂單數</th><th class="number">禮盒總數</th><th class="number">折後金額</th></tr></thead><tbody id="monthly-stats"></tbody></table></div>
+      </section>
+      <section class="section-band gap-section">
+        <h2>月份第一筆缺口紀錄</h2>
+        <div class="table-wrap"><table><thead><tr><th>月份</th><th>預期訂單</th><th>目前最早訂單</th><th>狀態</th></tr></thead><tbody id="gap-stats"></tbody></table></div>
+      </section>
+    </section>
+  </main>
+
+  <dialog id="order-dialog">
+    <div class="dialog-header"><div><h2 id="detail-order-no">訂單明細</h2><p id="detail-meta"></p></div><button id="close-dialog" aria-label="關閉">關閉</button></div>
+    <div id="detail-summary" class="detail-summary"></div>
+    <div class="table-wrap"><table><thead><tr><th>#</th><th>產品代碼</th><th>產品名稱</th><th class="number">數量</th><th class="number">折後金額</th></tr></thead><tbody id="detail-items"></tbody></table></div>
+  </dialog>
+
+  <dialog id="review-dialog" class="review-dialog">
+    <form id="review-form">
+      <div class="dialog-header">
+        <div><h2 id="review-dialog-title">待確認人工處理</h2><p id="review-dialog-meta"></p></div>
+        <button type="button" id="close-review-dialog" aria-label="關閉">關閉</button>
+      </div>
+      <div class="review-layout">
+        <section class="review-image-pane">
+          <img id="review-image" alt="待確認訂單原始圖片">
+          <a id="review-image-link" target="_blank" rel="noopener">在新視窗開啟原圖</a>
+        </section>
+          <section class="review-form-pane">
+            <div id="existing-order-warning" class="data-note" hidden>這個訂單編號已存在；確認時會比較完整內容，只有異動才新增版本。</div>
+            <div id="review-date-evidence" class="date-evidence" hidden>
+              <div><span>OCR選擇日期</span><b id="date-evidence-selected"></b></div>
+              <div><span>全部日期候選</span><b id="date-evidence-candidates"></b></div>
+              <div><span>原資料庫日期</span><b id="date-evidence-original"></b></div>
+              <div><span>查詢區間</span><b id="date-evidence-query"></b></div>
+              <div><span>建議日期</span><b id="date-evidence-suggested"></b></div>
+              <div class="wide-field"><span>日期異常原因</span><b id="date-evidence-reasons"></b></div>
+            </div>
+            <div class="review-fields">
+            <label><span>訂單編號</span><input id="review-order-no" required></label>
+            <label><span>訂貨日期</span><input id="review-order-date" type="date" required></label>
+            <label><span>訂單分類</span><input id="review-category" list="category-options" required></label>
+            <label><span>部門代號</span><input id="review-department" required></label>
+            <label class="wide-field"><span>客戶名稱</span><input id="review-customer"></label>
+            <label><span>門市</span><input id="review-store" value="SR" readonly></label>
+          </div>
+          <datalist id="category-options">
+            <option value="婚約"><option value="彌月"><option value="節慶"><option value="企業"><option value="其他">
+          </datalist>
+          <div class="review-items-heading">
+            <h3>訂貨明細</h3>
+            <button type="button" id="add-review-item" title="增加品項" aria-label="增加品項">+</button>
+          </div>
+          <div class="table-wrap review-items-wrap">
+            <table class="review-items-table">
+              <thead><tr><th>品項代號</th><th>中文品名</th><th>數量</th><th>單價</th><th>金額</th><th>折後金額</th><th></th></tr></thead>
+              <tbody id="review-items-body"></tbody>
+            </table>
+          </div>
+          <label class="review-note"><span>人工處理備註</span><textarea id="review-note" rows="3"></textarea></label>
+        </section>
+      </div>
+      <div class="review-actions">
+        <button type="button" id="hold-review">暫時保留待確認</button>
+        <button type="button" id="exclude-review" class="danger">標記不納入</button>
+        <button type="submit" id="confirm-review" class="primary">確認並寫入正式訂單</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script src="/app.js"></script>
+</body>
+</html>
